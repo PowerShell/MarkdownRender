@@ -1,0 +1,9 @@
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.csprojAssemblyReference.cache
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.AssemblyInfoInputs.cache
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.AssemblyInfo.cs
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.csproj.CoreCompileInputs.cache
+D:\PSGit\MarkdownRenderer\out\Microsoft.PowerShell.MarkdownRender.deps.json
+D:\PSGit\MarkdownRenderer\out\Microsoft.PowerShell.MarkdownRender.dll
+D:\PSGit\MarkdownRenderer\out\Microsoft.PowerShell.MarkdownRender.pdb
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.dll
+D:\PSGit\MarkdownRenderer\src\obj\Debug\netstandard2.0\Microsoft.PowerShell.MarkdownRender.pdb

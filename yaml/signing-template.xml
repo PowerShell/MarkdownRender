@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- template used by generatePackageSigning.ps1 -->
+<SignConfigXML>
+  <job platform="" configuration="" dest="__OUTPATHROOT__\signed" jobname="Microsoft.PowerShell.MarkdownRenderer" approvers="vigarg;gstolt">
+    <file src="__INPATHROOT__\{0}" signType="{1}" dest="__OUTPATHROOT__\{0}" />
+  </job>
+</SignConfigXML>

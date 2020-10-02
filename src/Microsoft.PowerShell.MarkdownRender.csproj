@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk" ToolsVersion="15.0">
+
+  <PropertyGroup>
+    <Description>PowerShell's Markdown Rendering project</Description>
+    <AssemblyName>Microsoft.PowerShell.MarkdownRender</AssemblyName>
+    <Product>PowerShell Markdown Renderer</Product>
+    <Company>Microsoft Corporation</Company>
+    <Copyright>(c) Microsoft Corporation.</Copyright>
+
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <IsPackable>true</IsPackable>
+
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+    <DelaySign>true</DelaySign>
+    <AssemblyOriginatorKeyFile>signing/visualstudiopublic.snk</AssemblyOriginatorKeyFile>
+    <SignAssembly>true</SignAssembly>
+    <HighEntropyVA>true</HighEntropyVA>
+  </PropertyGroup>
+
+  <ItemGroup>
+  <!-- Source: https://github.com/lunet-io/markdig/ -->
+    <PackageReference Include="Markdig.Signed" Version="0.21.1" />
+  </ItemGroup>
+
+</Project>
