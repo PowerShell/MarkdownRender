@@ -61,7 +61,7 @@ stages:
   jobs:
   - job: Compliance_Job
     pool:
-      vmImageName: windows-latest
+      vmImage: windows-latest
     steps:
     - checkout: self
     - checkout: ComplianceRepo
