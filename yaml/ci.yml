@@ -13,10 +13,6 @@ pr:
     - release*
 
 resources:
-  - repo: self
-    clean: true
-
-resources:
   repositories:
   - repository: ComplianceRepo
     type: github
@@ -61,7 +57,12 @@ stages:
 
 - stage: Compliance
   displayName: Compliance Microsoft.PowerShell.MarkdownRenderer
-  pool:
-    vmImage: windows-latest
+  dependsOn: Build
   jobs:
-  - template: template/credscan.yml
+  - job: Compliance_Job
+      pool:
+      name: Package ES CodeHub Lab E
+      steps:
+      - checkout: self
+      - checkout: ComplianceRepo
+      - template: ci-compliance.yml@ComplianceRepo
