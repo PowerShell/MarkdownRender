@@ -20,7 +20,7 @@ resources:
     name: PowerShell/compliance
 
 stages:
-- stage: build_and_tet
+- stage: Build
   pool:
     vmImage: windows-latest
   displayName: Build Microsoft.PowerShell.MarkdownRenderer
