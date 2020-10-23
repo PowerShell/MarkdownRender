@@ -94,16 +94,16 @@ stages:
 
     - checkout: ComplianceRepo
 
-    - template: EsrpSign@ComplianceRepo
-      parameters:
-        # the folder which contains the binaries to sign
-        buildOutputPath: $(signSrcPath)
+    #- template: EsrpSign@ComplianceRepo
+    #  parameters:
+    #    # the folder which contains the binaries to sign
+    #    buildOutputPath: $(signSrcPath)
         # the location to put the signed output
-        signOutputPath: $(signOutPath)
+    #    signOutputPath: $(signOutPath)
         # the certificate ID to use
-        certificateId: "CP-230012"
+    #    certificateId: "CP-230012"
         # the file pattern to use, comma separated
-        pattern: '*.dll'
+    #    pattern: '*.dll'
 
     - pwsh: |
         Copy-Item -Path "$env:SIGNSRCPATH\*.dll" -Destination "$env:SIGNOUTPATH\" -recurse -verbose
@@ -140,16 +140,16 @@ stages:
         }
       displayName: Create NuGet Package
 
-    - template: EsrpSign@ComplianceRepo
-      parameters:
+    #- template: EsrpSign@ComplianceRepo
+    #  parameters:
         # the folder which contains the binaries to sign
-        buildOutputPath: $(nugetSrcPath)
+    #    buildOutputPath: $(nugetSrcPath)
         # the location to put the signed output
-        signOutputPath: $(nugetOutPath)
+    #    signOutputPath: $(nugetOutPath)
         # the certificate ID to use
-        certificateId: "CP-401405"
+    #    certificateId: "CP-401405"
         # the file pattern to use, comma separated
-        pattern: '*.nupkg'
+    #    pattern: '*.nupkg'
 
     - pwsh: |
         Copy-Item -Path "$env:NUGETSRCPATH\*.nupkg" -Destination "$env:NUGETOUTPATH\" -recurse -verbose
