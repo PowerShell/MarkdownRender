@@ -52,21 +52,21 @@ stages:
       displayName: Set NuGet package version variable
 
     - pwsh: |
-        ./build.ps1 -Clean -Configuration 'Release'
+        ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
       displayName: Execute build
 
     - pwsh: |
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
+        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\MarkdownRender\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
       displayName: Upload PDB
 
     - pwsh: |
-        $signSrcPath = "$(Build.SourcesDirectory)\out"
+        $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\out"
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=signSrcPath]${signSrcPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $signOutPath = "$(Build.SourcesDirectory)\signed"
+        $signOutPath = "$(Build.SourcesDirectory)\MarkdownRender\signed"
         $null = New-Item -ItemType Directory -Path $signOutPath
         # Set signing out path variable
         $vstsCommandString = "vso[task.setvariable variable=signOutPath]${signOutPath}"
@@ -86,7 +86,7 @@ stages:
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
+        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\MarkdownRender\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
         $vstsCommandString = "vso[task.setvariable variable=pdbPath]${symbolPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
@@ -126,7 +126,7 @@ stages:
         $libPath = "$packageRootPath/lib/netstandard2.0"
         $null = New-Item -ItemType Directory -Path $libPath -Force
         Copy-Item -Path "$env:signOutPath\*" -Destination $libPath -Verbose
-        Copy-Item -Path '$(Build.SourcesDirectory)/yaml/microsoft.powershell.markdownrenderer.nuspec' -Destination $packageRootPath -Verbose
+        Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/yaml/microsoft.powershell.markdownrenderer.nuspec' -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
         Write-Verbose -Verbose "Creating NuGet package with version $version"
