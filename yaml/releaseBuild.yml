@@ -11,10 +11,12 @@ variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   POWERSHELL_TELEMETRY_OPTOUT: 1
 
-# Set AzDevOps Agent to clean the machine after the end of the build
 resources:
-- repo: self
-  clean: true
+  repositories:
+  - repository: ComplianceRepo
+    type: github
+    endpoint: ComplianceGHRepo
+    name: PowerShell/compliance
 
 stages:
 - stage: Build
@@ -25,18 +27,7 @@ stages:
   - job: Build_Job
     displayName: Build Microsoft.PowerShell.MarkdownRenderer
     steps:
-    - task: PkgESSetupBuild@10
-      displayName: 'Initialize build'
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        useDfs: false
-        productName: PowerShellCore
-        branchVersion: true
-        disableWorkspace: true
-        disableBuildTools: true
-        disableNugetPack: true
-      condition: and(succeeded(), ne(variables['SkipSigning'], 'true'))
+    - checkout: self
 
     - pwsh: |
         $versionString = if ($env:RELEASE_VERSION -eq 'fromBranch') {
@@ -66,32 +57,7 @@ stages:
 
     - pwsh: |
         $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
-
       displayName: Upload PDB
-
-    - pwsh: |
-        $signingTemplate = Get-Content -Raw "$(Build.SourcesDirectory)\yaml\signing-template.xml"
-        $signingFile = $signingTemplate -f "Microsoft.PowerShell.MarkdownRenderer.dll", "AuthenticodeFormer"
-        $signingFile | Write-Verbose -Verbose
-        $signXmlPath = "$(System.ArtifactsDirectory)\signing.xml"
-        $signingFile | Out-File -FilePath $signXmlPath -Force
-
-        # Set signing xml path
-        $vstsCommandString = "vso[task.setvariable variable=signXmlPath]${signXmlPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-
-        $version = "$env:VERSION"
-        $nugetSigningFile = $signingTemplate -f "Microsoft.PowerShell.MarkdownRenderer.$version.nupkg", "NuGet"
-        $nugetSigningFile | Write-Verbose -Verbose
-        $nugetSignXmlPath = "$(System.ArtifactsDirectory)\nugetSigning.xml"
-        $nugetSigningFile | Out-File -FilePath $nugetSignXmlPath -Force
-
-        # Set nuget signing xml path
-        $vstsCommandString = "vso[task.setvariable variable=nugetSignXmlPath]${nugetSignXmlPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-      displayName: Create signing files
 
     - pwsh: |
         $signSrcPath = "$(Build.SourcesDirectory)\out"
@@ -126,17 +92,18 @@ stages:
         Write-Host "##$vstsCommandString"
       displayName: Setup variables for signing
 
-    - task: PkgESCodeSign@10
-      displayName: Sign build files
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        signConfigXml: '$(signXmlPath)'
-        inPathRoot: '$(signSrcPath)'
-        outPathRoot: '$(signOutPath)'
-        binVersion: Production
-        binVersionOverride: ''
-      condition: and(and(succeeded(), eq(variables['Build.Reason'], 'Manual')), ne(variables['SkipSigning'], 'True'))
+    - checkout: ComplianceRepo
+
+    - template: EsrpSign@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(signSrcPath)
+        # the location to put the signed output
+        signOutputPath: $(signOutPath)
+        # the certificate ID to use
+        certificateId: "CP-230012"
+        # the file pattern to use, comma separated
+        pattern: '*.dll'
 
     - pwsh: |
         Copy-Item -Path "$env:SIGNSRCPATH\*.dll" -Destination "$env:SIGNOUTPATH\" -recurse -verbose
@@ -173,17 +140,16 @@ stages:
         }
       displayName: Create NuGet Package
 
-    - task: PkgESCodeSign@10
-      displayName: Sign nuget package
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        signConfigXml: '$(nugetSignXmlPath)'
-        inPathRoot: '$(nugetSrcPath)'
-        outPathRoot: '$(nugetOutPath)'
-        binVersion: Production
-        binVersionOverride: ''
-      condition: and(and(succeeded(), eq(variables['Build.Reason'], 'Manual')), ne(variables['SkipSigning'], 'True'))
+    - template: EsrpSign@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(nugetSrcPath)
+        # the location to put the signed output
+        signOutputPath: $(nugetOutPath)
+        # the certificate ID to use
+        certificateId: "CP-401405"
+        # the file pattern to use, comma separated
+        pattern: '*.nupkg'
 
     - pwsh: |
         Copy-Item -Path "$env:NUGETSRCPATH\*.nupkg" -Destination "$env:NUGETOUTPATH\" -recurse -verbose
@@ -201,6 +167,33 @@ stages:
     - publish: '$(NUGETPKGPATH)'
       artifact: nuget
       displayName: Publish nuget package
+
+- stage: compliance
+  displayName: Compliance
+  dependsOn: Build
+  jobs:
+  - job: Compliance_Job
+    pool:
+    name: Package ES CodeHub Lab E
+    steps:
+    - checkout: self
+    - checkout: ComplianceGHRepo
+    - template: assembly-module-compliance.yml@ComplianceRepo
+      parameters:
+        # binskim
+        AnalyzeTarget: '$(signOutPath)\*.dll'
+        AnalyzeSymPath: 'SRV*'
+        # component-governance
+        sourceScanPath: '$(Build.SourcesDirectory)\Markdownrender'
+        # credscan
+        suppressionsFile: ''
+        # TermCheck
+        optionsRulesDBPath: ''
+        optionsFTPath: ''
+        # tsa-upload
+        codeBaseName: 'MarkdownRender_20201023'
+        # selections
+        APIScan: false # set to false when not using Windows APIs.
 
 #- template: template/publish.yml
 #  parameters:
