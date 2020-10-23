@@ -177,7 +177,7 @@ stages:
       name: Package ES CodeHub Lab E
     steps:
     - checkout: self
-    - checkout: ComplianceGHRepo
+    - checkout: ComplianceRepo
     - template: assembly-module-compliance.yml@ComplianceRepo
       parameters:
         # binskim
