@@ -126,7 +126,7 @@ stages:
         $libPath = "$packageRootPath/lib/netstandard2.0"
         $null = New-Item -ItemType Directory -Path $libPath -Force
         Copy-Item -Path "$env:signOutPath\*" -Destination $libPath -Verbose
-        Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/yaml/microsoft.powershell.markdownrenderer.nuspec' -Destination $packageRootPath -Verbose
+        Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/src/packaging/microsoft.powershell.markdownrender.nuspec' -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
         Write-Verbose -Verbose "Creating NuGet package with version $version"
@@ -154,7 +154,7 @@ stages:
     - pwsh: |
         Copy-Item -Path "$env:NUGETSRCPATH\*.nupkg" -Destination "$env:NUGETOUTPATH\" -recurse -verbose
       displayName: Dummy nuget copy to signed
-      condition: eq(variables['SkipSigning'], 'True')
+      condition: and(succeeded(),eq(variables['SkipSigning'], 'True'))
 
     - pwsh: |
         $version = "$env:VERSION"
