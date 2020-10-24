@@ -110,7 +110,7 @@ stages:
       displayName: Dummy copy to signed
       condition: eq(variables['SkipSigning'], 'True')
 
-    - publish: "signed/"
+    - publish: "$env:SIGNOUTPATH/"
       artifact: assembly
       displayName: Publish assembly
 
