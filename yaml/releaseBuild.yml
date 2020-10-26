@@ -69,6 +69,11 @@ stages:
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
+        # Set path variable for guardian codesign validation
+        $vstsCommandString = "vso[task.setvariable variable=GDN_CODESIGN_TARGETDIRECTORY]${signOutPath}"
+        Write-Host "sending " + $vstsCommandString
+        Write-Host "##$vstsCommandString"
+
         $nugetSrcPath = "$(System.ArtifactsDirectory)/nuget"
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetSrcPath]${nugetSrcPath}"
@@ -90,16 +95,16 @@ stages:
 
     - checkout: ComplianceRepo
 
-    #- template: EsrpSign@ComplianceRepo
-    #  parameters:
-    #    # the folder which contains the binaries to sign
-    #    buildOutputPath: $(signSrcPath)
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(signSrcPath)
         # the location to put the signed output
-    #    signOutputPath: $(signOutPath)
+        signOutputPath: $(signOutPath)
         # the certificate ID to use
-    #    certificateId: "CP-230012"
+        certificateId: "CP-230012"
         # the file pattern to use, comma separated
-    #    pattern: '*.dll'
+        pattern: '*.dll'
 
     - pwsh: |
         Copy-Item -Path "$env:SIGNSRCPATH\*.dll" -Destination "$env:SIGNOUTPATH\" -recurse -verbose
@@ -136,16 +141,16 @@ stages:
         }
       displayName: Create NuGet Package
 
-    #- template: EsrpSign@ComplianceRepo
-    #  parameters:
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
         # the folder which contains the binaries to sign
-    #    buildOutputPath: $(nugetSrcPath)
+        buildOutputPath: $(nugetSrcPath)
         # the location to put the signed output
-    #    signOutputPath: $(nugetOutPath)
+        signOutputPath: $(nugetOutPath)
         # the certificate ID to use
-    #    certificateId: "CP-401405"
+        certificateId: "CP-401405"
         # the file pattern to use, comma separated
-    #    pattern: '*.nupkg'
+        pattern: '*.nupkg'
 
     - pwsh: |
         Copy-Item -Path "$env:NUGETSRCPATH\*.nupkg" -Destination "$env:NUGETOUTPATH\" -recurse -verbose
@@ -178,7 +183,7 @@ stages:
       artifact: symbols
 
     - pwsh: |
-        Get-ChildItem -Path $(Pipeline.Workspace)
+        Get-ChildItem -Path "$(Pipeline.Workspace)\symbols" -Recurse
       displayName: Capture downloaded artifacts
 
     - template: assembly-module-compliance.yml@ComplianceRepo
