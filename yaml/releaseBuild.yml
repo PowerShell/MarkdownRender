@@ -112,12 +112,12 @@ stages:
       condition: eq(variables['SkipSigning'], 'True')
 
     - publish: "$(SIGNOUTPATH)"
-      artifact: assembly
-      displayName: Publish assembly
+      artifact: signed
+      displayName: Publish signed assembly
 
-    - publish: "$(pdbPath)"
-      artifact: symbols
-      displayName: Publish symbols
+    - publish: "$(signSrcPath)"
+      artifact: build
+      displayName: Publish build
 
     - task: NuGetToolInstaller@1
       displayName: 'Install NuGet.exe'
@@ -180,16 +180,16 @@ stages:
     - checkout: self
     - checkout: ComplianceRepo
     - download: current
-      artifact: symbols
+      artifact: build
 
     - pwsh: |
-        Get-ChildItem -Path "$(Pipeline.Workspace)\symbols" -Recurse
+        Get-ChildItem -Path "$(Pipeline.Workspace)\build" -Recurse
       displayName: Capture downloaded artifacts
 
     - template: assembly-module-compliance.yml@ComplianceRepo
       parameters:
         # binskim
-        AnalyzeTarget: '$(Pipeline.Workspace)\MarkdownRender\*.dll'
+        AnalyzeTarget: '$(Pipeline.Workspace)\*.dll'
         AnalyzeSymPath: 'SRV*'
         # component-governance
         sourceScanPath: '$(Build.SourcesDirectory)\Markdownrender'
