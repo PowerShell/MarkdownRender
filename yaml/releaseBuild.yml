@@ -139,6 +139,10 @@ stages:
         }
       displayName: Create NuGet Package
 
+    - publish: '$(nugetSrcPath)/Microsoft.PowerShell.MarkdownRender.$(VERSION).nupkg'
+      artifact: unsigned-nuget
+      displayName: Publish nuget package
+
     - template: EsrpSign.yml@ComplianceRepo
       parameters:
         # the folder which contains the binaries to sign
