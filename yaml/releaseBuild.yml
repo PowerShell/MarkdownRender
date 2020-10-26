@@ -26,6 +26,8 @@ stages:
   jobs:
   - job: Build_Job
     displayName: Build Microsoft.PowerShell.MarkdownRenderer
+    variables:
+    - group: ESRP
     steps:
     - checkout: self
 
@@ -84,11 +86,6 @@ stages:
         $null = New-Item -ItemType Directory -Path $nugetOutPath
         # Set signing out path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetOutPath]${nugetOutPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\MarkdownRender\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
-        $vstsCommandString = "vso[task.setvariable variable=pdbPath]${symbolPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
       displayName: Setup variables for signing
