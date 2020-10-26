@@ -56,10 +56,6 @@ stages:
       displayName: Execute build
 
     - pwsh: |
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\MarkdownRender\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
-      displayName: Upload PDB
-
-    - pwsh: |
         $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\out"
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=signSrcPath]${signSrcPath}"
@@ -178,10 +174,17 @@ stages:
     steps:
     - checkout: self
     - checkout: ComplianceRepo
+    - download: current
+      artifact: symbols
+
+    - pwsh: |
+        Get-ChildItem -Path $(Pipeline.Workspace)
+      displayName: Capture downloaded artifacts
+
     - template: assembly-module-compliance.yml@ComplianceRepo
       parameters:
         # binskim
-        AnalyzeTarget: '$(signOutPath)\*.dll'
+        AnalyzeTarget: '$(Pipeline.Workspace)\MarkdownRender\*.dll'
         AnalyzeSymPath: 'SRV*'
         # component-governance
         sourceScanPath: '$(Build.SourcesDirectory)\Markdownrender'
