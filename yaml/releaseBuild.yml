@@ -1,4 +1,4 @@
-name: MarkdownRenderer-Release-$(Build.BuildId)
+name: MarkdownRender-Release-$(Build.BuildId)
 trigger: none
 
 pr:
@@ -25,7 +25,7 @@ stages:
     name: Package ES CodeHub Lab E
   jobs:
   - job: Build_Job
-    displayName: Build Microsoft.PowerShell.MarkdownRenderer
+    displayName: Build Microsoft.PowerShell.MarkdownRender
     variables:
     - group: ESRP
     steps:
@@ -77,6 +77,7 @@ stages:
         Write-Host "##$vstsCommandString"
 
         $nugetSrcPath = "$(System.ArtifactsDirectory)/nuget"
+        $null = New-Item -ItemType Directory -Path $nugetSrcPath
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetSrcPath]${nugetSrcPath}"
         Write-Host "sending " + $vstsCommandString
@@ -120,7 +121,7 @@ stages:
       displayName: 'Install NuGet.exe'
 
     - pwsh: |
-        $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRenderer'
+        $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRender'
         $libPath = "$packageRootPath/lib/netstandard2.0"
         $null = New-Item -ItemType Directory -Path $libPath -Force
         Copy-Item -Path "$env:signOutPath\*" -Destination $libPath -Verbose
@@ -130,11 +131,11 @@ stages:
         Write-Verbose -Verbose "Creating NuGet package with version $version"
         nuget.exe pack . -Version $version
 
-        if (-not (Test-Path "./Microsoft.PowerShell.MarkdownRenderer.$version.nupkg")) {
+        if (-not (Test-Path "./Microsoft.PowerShell.MarkdownRender.$version.nupkg")) {
             throw 'NuGet package not created.'
         }
         else {
-            Copy-Item "./Microsoft.PowerShell.MarkdownRenderer.$version.nupkg" -Destination '$(System.ArtifactsDirectory)/nuget' -Verbose -Force
+            Copy-Item "./Microsoft.PowerShell.MarkdownRender.$version.nupkg" -Destination '$(nugetSrcPath)' -Verbose -Force
         }
       displayName: Create NuGet Package
 
@@ -156,7 +157,7 @@ stages:
 
     - pwsh: |
         $version = "$env:VERSION"
-        $nugetPkgPath = Get-Item -Path "$env:NUGETOUTPATH/Microsoft.PowerShell.MarkdownRenderer.$version.nupkg"
+        $nugetPkgPath = Get-Item -Path "$env:NUGETOUTPATH/Microsoft.PowerShell.MarkdownRender.$version.nupkg"
         $vstsCommandString = "vso[task.setvariable variable=nugetPkgPath]${nugetPkgPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
@@ -209,5 +210,5 @@ stages:
 #- template: template/publish.yml
 #  parameters:
 #    stageName: NuGet
-#    environmentName: PSMarkdownRendererNuGetApproval
+#    environmentName: PSMarkdownRenderNuGetApproval
 #    feedCredential: NugetOrgPush
