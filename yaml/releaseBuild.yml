@@ -58,10 +58,22 @@ stages:
         ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
       displayName: Execute build
 
+    - publish: "$(signSrcPath)"
+      artifact: build
+      displayName: Publish build
+
     - pwsh: |
-        $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\out"
+        $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\tosign"
+        $null = New-Item -ItemType Directory -Path $signSrcPath
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=signSrcPath]${signSrcPath}"
+        Write-Host "sending " + $vstsCommandString
+        Write-Host "##$vstsCommandString"
+
+        $signThirdPartyPath = "$(Build.SourcesDirectory)\MarkdownRender\tosignthirdparty"
+        $null = New-Item -ItemType Directory -Path $signThirdPartyPath
+        # Set signing src path variable
+        $vstsCommandString = "vso[task.setvariable variable=signThirdPartyPath]${signThirdPartyPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
@@ -92,6 +104,16 @@ stages:
         Write-Host "##$vstsCommandString"
       displayName: Setup variables for signing
 
+    - pwsh: |
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Microsoft.PowerShell.MarkdownRender.dll" -Destination '$(signSrcPath)\' -Verbose -Force
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Markdig.Signed.dll" -Destination '$(signThirdPartyPath)\' -Verbose -Force
+      displayName: Copy files to sign
+
+    - pwsh: |
+        $excludeList = @('Microsoft.PowerShell.MarkdownRender.dll', 'Markdig.Signed.dll')
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\*.dll" -Destination '$(signOutPath)' -Verbose -Exclude 'Microsoft.PowerShell.MarkdownRender.dll'
+      displayName: Copy pre-signed dependent assemblies
+
     - checkout: ComplianceRepo
 
     - template: EsrpSign.yml@ComplianceRepo
@@ -105,6 +127,17 @@ stages:
         # the file pattern to use, comma separated
         pattern: '*.dll'
 
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(signThirdPartyPath)
+        # the location to put the signed output
+        signOutputPath: $(signOutPath)
+        # the certificate ID to use
+        certificateId: "CP-231522"
+        # the file pattern to use, comma separated
+        pattern: '*.dll'
+
     - pwsh: |
         Copy-Item -Path "$env:SIGNSRCPATH\*.dll" -Destination "$env:SIGNOUTPATH\" -recurse -verbose
       displayName: Dummy copy to signed
@@ -113,10 +146,6 @@ stages:
     - publish: "$(SIGNOUTPATH)"
       artifact: signed
       displayName: Publish signed assembly
-
-    - publish: "$(signSrcPath)"
-      artifact: build
-      displayName: Publish build
 
     - task: NuGetToolInstaller@1
       displayName: 'Install NuGet.exe'
