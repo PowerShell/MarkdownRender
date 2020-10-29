@@ -84,7 +84,7 @@ stages:
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $nugetOutPath = "$(System.ArtifactsDirectory)\nuget\signed"
+        $nugetOutPath = "$(System.ArtifactsDirectory)\nuget-signed"
         $null = New-Item -ItemType Directory -Path $nugetOutPath
         # Set signing out path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetOutPath]${nugetOutPath}"
