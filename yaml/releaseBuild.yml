@@ -100,7 +100,7 @@ stages:
         ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
       displayName: Execute build
 
-    - publish: "$(Build.SourcesDirectory)\MarkdownRender\out"
+    - publish: "$(Build.SourcesDirectory)\\MarkdownRender\\out"
       artifact: build
       displayName: Publish build
 
