@@ -55,14 +55,6 @@ stages:
       displayName: Set NuGet package version variable
 
     - pwsh: |
-        ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
-      displayName: Execute build
-
-    - publish: "$(signSrcPath)"
-      artifact: build
-      displayName: Publish build
-
-    - pwsh: |
         $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\tosign"
         $null = New-Item -ItemType Directory -Path $signSrcPath
         # Set signing src path variable
@@ -103,6 +95,14 @@ stages:
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
       displayName: Setup variables for signing
+
+    - pwsh: |
+        ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
+      displayName: Execute build
+
+    - publish: "$(signSrcPath)"
+      artifact: build
+      displayName: Publish build
 
     - pwsh: |
         Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Microsoft.PowerShell.MarkdownRender.dll" -Destination '$(signSrcPath)\' -Verbose -Force
