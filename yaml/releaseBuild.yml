@@ -234,14 +234,14 @@ stages:
         # selections
         APIScan: false # set to false when not using Windows APIs.
 
-#- template: template/publish.yml
-#  parameters:
-#    stageName: AzArtifactsFeed
-#    environmentName:
-#    feedCredential:
+- template: template/publish.yml
+  parameters:
+    stageName: AzArtifactsFeed
+    environmentName: AzArtFeedApproval
+    feedCredential: AzArtifactFeedPush
 
-#- template: template/publish.yml
-#  parameters:
-#    stageName: NuGet
-#    environmentName: PSMarkdownRenderNuGetApproval
-#    feedCredential: NugetOrgPush
+- template: template/publish.yml
+  parameters:
+    stageName: NuGet
+    environmentName: NugetFeedApproval
+    feedCredential: NugetOrgPush
