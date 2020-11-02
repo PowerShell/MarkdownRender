@@ -1,4 +1,4 @@
-name: MarkdownRenderer-Release-$(Build.BuildId)
+name: MarkdownRender-Release-$(Build.BuildId)
 trigger: none
 
 pr:
@@ -11,10 +11,12 @@ variables:
   DOTNET_CLI_TELEMETRY_OPTOUT: 1
   POWERSHELL_TELEMETRY_OPTOUT: 1
 
-# Set AzDevOps Agent to clean the machine after the end of the build
 resources:
-- repo: self
-  clean: true
+  repositories:
+  - repository: ComplianceRepo
+    type: github
+    endpoint: ComplianceGHRepo
+    name: PowerShell/compliance
 
 stages:
 - stage: Build
@@ -23,20 +25,11 @@ stages:
     name: Package ES CodeHub Lab E
   jobs:
   - job: Build_Job
-    displayName: Build Microsoft.PowerShell.MarkdownRenderer
+    displayName: Build Microsoft.PowerShell.MarkdownRender
+    variables:
+    - group: ESRP
     steps:
-    - task: PkgESSetupBuild@10
-      displayName: 'Initialize build'
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        useDfs: false
-        productName: PowerShellCore
-        branchVersion: true
-        disableWorkspace: true
-        disableBuildTools: true
-        disableNugetPack: true
-      condition: and(succeeded(), ne(variables['SkipSigning'], 'true'))
+    - checkout: self
 
     - pwsh: |
         $versionString = if ($env:RELEASE_VERSION -eq 'fromBranch') {
@@ -61,138 +54,143 @@ stages:
       displayName: Set NuGet package version variable
 
     - pwsh: |
-        ./build.ps1 -Clean -Configuration 'Release'
-      displayName: Execute build
-
-    - pwsh: |
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
-
-      displayName: Upload PDB
-
-    - pwsh: |
-        $signingTemplate = Get-Content -Raw "$(Build.SourcesDirectory)\yaml\signing-template.xml"
-        $signingFile = $signingTemplate -f "Microsoft.PowerShell.MarkdownRenderer.dll", "AuthenticodeFormer"
-        $signingFile | Write-Verbose -Verbose
-        $signXmlPath = "$(System.ArtifactsDirectory)\signing.xml"
-        $signingFile | Out-File -FilePath $signXmlPath -Force
-
-        # Set signing xml path
-        $vstsCommandString = "vso[task.setvariable variable=signXmlPath]${signXmlPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-
-        $version = "$env:VERSION"
-        $nugetSigningFile = $signingTemplate -f "Microsoft.PowerShell.MarkdownRenderer.$version.nupkg", "NuGet"
-        $nugetSigningFile | Write-Verbose -Verbose
-        $nugetSignXmlPath = "$(System.ArtifactsDirectory)\nugetSigning.xml"
-        $nugetSigningFile | Out-File -FilePath $nugetSignXmlPath -Force
-
-        # Set nuget signing xml path
-        $vstsCommandString = "vso[task.setvariable variable=nugetSignXmlPath]${nugetSignXmlPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-      displayName: Create signing files
-
-    - pwsh: |
-        $signSrcPath = "$(Build.SourcesDirectory)\out"
+        $signSrcPath = "$(Build.SourcesDirectory)\MarkdownRender\tosign"
+        $null = New-Item -ItemType Directory -Path $signSrcPath
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=signSrcPath]${signSrcPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $signOutPath = "$(Build.SourcesDirectory)\signed"
+        $signThirdPartyPath = "$(Build.SourcesDirectory)\MarkdownRender\tosignthirdparty"
+        $null = New-Item -ItemType Directory -Path $signThirdPartyPath
+        # Set signing src path variable
+        $vstsCommandString = "vso[task.setvariable variable=signThirdPartyPath]${signThirdPartyPath}"
+        Write-Host "sending " + $vstsCommandString
+        Write-Host "##$vstsCommandString"
+
+        $signOutPath = "$(Build.SourcesDirectory)\MarkdownRender\signed"
         $null = New-Item -ItemType Directory -Path $signOutPath
         # Set signing out path variable
         $vstsCommandString = "vso[task.setvariable variable=signOutPath]${signOutPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
+        # Set path variable for guardian codesign validation
+        $vstsCommandString = "vso[task.setvariable variable=GDN_CODESIGN_TARGETDIRECTORY]${signOutPath}"
+        Write-Host "sending " + $vstsCommandString
+        Write-Host "##$vstsCommandString"
+
         $nugetSrcPath = "$(System.ArtifactsDirectory)/nuget"
+        $null = New-Item -ItemType Directory -Path $nugetSrcPath
         # Set signing src path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetSrcPath]${nugetSrcPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $nugetOutPath = "$(System.ArtifactsDirectory)\nuget\signed"
+        $nugetOutPath = "$(System.ArtifactsDirectory)\nuget-signed"
         $null = New-Item -ItemType Directory -Path $nugetOutPath
         # Set signing out path variable
         $vstsCommandString = "vso[task.setvariable variable=nugetOutPath]${nugetOutPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
-
-        $symbolPath = Get-ChildItem -Path "$(Build.SourcesDirectory)\out" -Recurse -Filter 'Microsoft.PowerShell.MarkdownRenderer.pdb'
-        $vstsCommandString = "vso[task.setvariable variable=pdbPath]${symbolPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
       displayName: Setup variables for signing
 
-    - task: PkgESCodeSign@10
-      displayName: Sign build files
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        signConfigXml: '$(signXmlPath)'
-        inPathRoot: '$(signSrcPath)'
-        outPathRoot: '$(signOutPath)'
-        binVersion: Production
-        binVersionOverride: ''
-      condition: and(and(succeeded(), eq(variables['Build.Reason'], 'Manual')), ne(variables['SkipSigning'], 'True'))
+    - pwsh: |
+        ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
+      displayName: Execute build
+
+    - publish: "$(Build.SourcesDirectory)\\MarkdownRender\\out"
+      artifact: build
+      displayName: Publish build
+
+    - pwsh: |
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Microsoft.PowerShell.MarkdownRender.dll" -Destination '$(signSrcPath)\' -Verbose -Force
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Markdig.Signed.dll" -Destination '$(signThirdPartyPath)\' -Verbose -Force
+      displayName: Copy files to sign
+
+    - pwsh: |
+        $excludeList = @('Microsoft.PowerShell.MarkdownRender.dll', 'Markdig.Signed.dll')
+        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\*.dll" -Destination '$(signOutPath)' -Verbose -Exclude 'Microsoft.PowerShell.MarkdownRender.dll'
+      displayName: Copy pre-signed dependent assemblies
+
+    - checkout: ComplianceRepo
+
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(signSrcPath)
+        # the location to put the signed output
+        signOutputPath: $(signOutPath)
+        # the certificate ID to use
+        certificateId: "CP-230012"
+        # the file pattern to use, comma separated
+        pattern: '*.dll'
+
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(signThirdPartyPath)
+        # the location to put the signed output
+        signOutputPath: $(signOutPath)
+        # the certificate ID to use
+        certificateId: "CP-231522"
+        # the file pattern to use, comma separated
+        pattern: '*.dll'
 
     - pwsh: |
         Copy-Item -Path "$env:SIGNSRCPATH\*.dll" -Destination "$env:SIGNOUTPATH\" -recurse -verbose
       displayName: Dummy copy to signed
       condition: eq(variables['SkipSigning'], 'True')
 
-    - publish: "signed/"
-      artifact: assembly
-      displayName: Publish assembly
-
-    - publish: "$(pdbPath)"
-      artifact: symbols
-      displayName: Publish symbols
+    - publish: "$(SIGNOUTPATH)"
+      artifact: signed
+      displayName: Publish signed assembly
 
     - task: NuGetToolInstaller@1
       displayName: 'Install NuGet.exe'
 
     - pwsh: |
-        $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRenderer'
+        $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRender'
         $libPath = "$packageRootPath/lib/netstandard2.0"
         $null = New-Item -ItemType Directory -Path $libPath -Force
-        Copy-Item -Path "$env:signOutPath\*" -Destination $libPath -Verbose
-        Copy-Item -Path '$(Build.SourcesDirectory)/yaml/microsoft.powershell.markdownrenderer.nuspec' -Destination $packageRootPath -Verbose
+        Copy-Item -Path "$env:signOutPath\*.dll" -Destination $libPath -Verbose
+        Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/src/packaging/microsoft.powershell.markdownrender.nuspec' -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
         Write-Verbose -Verbose "Creating NuGet package with version $version"
         nuget.exe pack . -Version $version
 
-        if (-not (Test-Path "./Microsoft.PowerShell.MarkdownRenderer.$version.nupkg")) {
+        if (-not (Test-Path "./Microsoft.PowerShell.MarkdownRender.$version.nupkg")) {
             throw 'NuGet package not created.'
         }
         else {
-            Copy-Item "./Microsoft.PowerShell.MarkdownRenderer.$version.nupkg" -Destination '$(System.ArtifactsDirectory)/nuget' -Verbose -Force
+            Copy-Item "./Microsoft.PowerShell.MarkdownRender.$version.nupkg" -Destination '$(nugetSrcPath)' -Verbose -Force
         }
       displayName: Create NuGet Package
 
-    - task: PkgESCodeSign@10
-      displayName: Sign nuget package
-      env:
-        SYSTEM_ACCESSTOKEN: $(System.AccessToken)
-      inputs:
-        signConfigXml: '$(nugetSignXmlPath)'
-        inPathRoot: '$(nugetSrcPath)'
-        outPathRoot: '$(nugetOutPath)'
-        binVersion: Production
-        binVersionOverride: ''
-      condition: and(and(succeeded(), eq(variables['Build.Reason'], 'Manual')), ne(variables['SkipSigning'], 'True'))
+    - publish: '$(nugetSrcPath)/Microsoft.PowerShell.MarkdownRender.$(VERSION).nupkg'
+      artifact: unsigned-nuget
+      displayName: Publish nuget package
+
+    - template: EsrpSign.yml@ComplianceRepo
+      parameters:
+        # the folder which contains the binaries to sign
+        buildOutputPath: $(nugetSrcPath)
+        # the location to put the signed output
+        signOutputPath: $(nugetOutPath)
+        # the certificate ID to use
+        certificateId: "CP-401405"
+        # the file pattern to use, comma separated
+        pattern: '*.nupkg'
 
     - pwsh: |
         Copy-Item -Path "$env:NUGETSRCPATH\*.nupkg" -Destination "$env:NUGETOUTPATH\" -recurse -verbose
       displayName: Dummy nuget copy to signed
-      condition: eq(variables['SkipSigning'], 'True')
+      condition: and(succeeded(),eq(variables['SkipSigning'], 'True'))
 
     - pwsh: |
         $version = "$env:VERSION"
-        $nugetPkgPath = Get-Item -Path "$env:NUGETOUTPATH/Microsoft.PowerShell.MarkdownRenderer.$version.nupkg"
+        $nugetPkgPath = Get-Item -Path "$env:NUGETOUTPATH/Microsoft.PowerShell.MarkdownRender.$version.nupkg"
         $vstsCommandString = "vso[task.setvariable variable=nugetPkgPath]${nugetPkgPath}"
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
@@ -202,14 +200,48 @@ stages:
       artifact: nuget
       displayName: Publish nuget package
 
-#- template: template/publish.yml
-#  parameters:
-#    stageName: AzArtifactsFeed
-#    environmentName:
-#    feedCredential:
+- stage: compliance
+  displayName: Compliance
+  dependsOn: Build
+  jobs:
+  - job: Compliance_Job
+    pool:
+      name: Package ES CodeHub Lab E
+    steps:
+    - checkout: self
+    - checkout: ComplianceRepo
+    - download: current
+      artifact: build
 
-#- template: template/publish.yml
-#  parameters:
-#    stageName: NuGet
-#    environmentName: PSMarkdownRendererNuGetApproval
-#    feedCredential: NugetOrgPush
+    - pwsh: |
+        Get-ChildItem -Path "$(Pipeline.Workspace)\build" -Recurse
+      displayName: Capture downloaded artifacts
+
+    - template: assembly-module-compliance.yml@ComplianceRepo
+      parameters:
+        # binskim
+        AnalyzeTarget: '$(Pipeline.Workspace)\*.dll'
+        AnalyzeSymPath: 'SRV*'
+        # component-governance
+        sourceScanPath: '$(Build.SourcesDirectory)\Markdownrender'
+        # credscan
+        suppressionsFile: ''
+        # TermCheck
+        optionsRulesDBPath: ''
+        optionsFTPath: ''
+        # tsa-upload
+        codeBaseName: 'MarkdownRender_20201023'
+        # selections
+        APIScan: false # set to false when not using Windows APIs.
+
+- template: template/publish.yml
+  parameters:
+    stageName: AzArtifactsFeed
+    environmentName: AzArtFeedApproval
+    feedCredential: AzArtifactFeedPush
+
+- template: template/publish.yml
+  parameters:
+    stageName: NuGet
+    environmentName: NugetFeedApproval
+    feedCredential: NugetOrgPush

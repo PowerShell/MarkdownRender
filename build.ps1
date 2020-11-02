@@ -26,8 +26,7 @@ try {
         dotnet clean
     }
 
-    dotnet build --output "$PSScriptRoot/out" --configuration $Configuration
-
+    dotnet publish --output "$PSScriptRoot/out" --configuration $Configuration
 }
 finally {
     Pop-Location

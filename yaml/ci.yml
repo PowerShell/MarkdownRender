@@ -23,7 +23,7 @@ stages:
 - stage: Build
   pool:
     vmImage: windows-latest
-  displayName: Build Microsoft.PowerShell.MarkdownRenderer
+  displayName: Build Microsoft.PowerShell.MarkdownRender
   jobs:
   - job: Build
     displayName: Build
@@ -35,7 +35,7 @@ stages:
       artifact: out
 
 - stage: Test
-  displayName: Test Microsoft.PowerShell.MarkdownRenderer
+  displayName: Test Microsoft.PowerShell.MarkdownRender
   jobs:
   - template: template/runtest.yml
     parameters:
@@ -56,7 +56,7 @@ stages:
       jobDisplayName: Run tests macOS
 
 - stage: Compliance
-  displayName: Compliance Microsoft.PowerShell.MarkdownRenderer
+  displayName: Compliance Microsoft.PowerShell.MarkdownRender
   dependsOn: Build
   jobs:
   - job: Compliance_Job
