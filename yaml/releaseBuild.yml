@@ -99,6 +99,10 @@ stages:
         ./MarkdownRender/build.ps1 -Clean -Configuration 'Release'
       displayName: Execute build
 
+    - publish: "$(Build.SourcesDirectory)\\MarkdownRender\\src\\obj\\project.assets.json"
+      artifact: AssetsJson
+      displayName: Publish project.assets.json
+
     - publish: "$(Build.SourcesDirectory)\\MarkdownRender\\out"
       artifact: build
       displayName: Publish build
@@ -212,9 +216,13 @@ stages:
     - checkout: ComplianceRepo
     - download: current
       artifact: build
+    - download: current
+      artifact: AssetsJson
 
     - pwsh: |
         Get-ChildItem -Path "$(Pipeline.Workspace)\build" -Recurse
+
+        Get-ChildItem -Path "$(Pipeline.Workspace)\AssetsJson" -Recurse
       displayName: Capture downloaded artifacts
 
     - template: assembly-module-compliance.yml@ComplianceRepo
@@ -223,7 +231,7 @@ stages:
         AnalyzeTarget: '$(Pipeline.Workspace)\*.dll'
         AnalyzeSymPath: 'SRV*'
         # component-governance
-        sourceScanPath: '$(Build.SourcesDirectory)\Markdownrender'
+        sourceScanPath: '$(Pipeline.Workspace)\AssetsJson'
         # credscan
         suppressionsFile: ''
         # TermCheck
