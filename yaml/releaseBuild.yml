@@ -159,6 +159,7 @@ stages:
         $null = New-Item -ItemType Directory -Path $libPath -Force
         Copy-Item -Path "$env:signOutPath\*.dll" -Destination $libPath -Verbose
         Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/src/packaging/microsoft.powershell.markdownrender.nuspec' -Destination $packageRootPath -Verbose
+        Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/ThirdPartyNotices.txt -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
         Write-Verbose -Verbose "Creating NuGet package with version $version"
