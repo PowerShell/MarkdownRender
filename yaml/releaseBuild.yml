@@ -61,13 +61,6 @@ stages:
         Write-Host "sending " + $vstsCommandString
         Write-Host "##$vstsCommandString"
 
-        $signThirdPartyPath = "$(Build.SourcesDirectory)\MarkdownRender\tosignthirdparty"
-        $null = New-Item -ItemType Directory -Path $signThirdPartyPath
-        # Set signing src path variable
-        $vstsCommandString = "vso[task.setvariable variable=signThirdPartyPath]${signThirdPartyPath}"
-        Write-Host "sending " + $vstsCommandString
-        Write-Host "##$vstsCommandString"
-
         $signOutPath = "$(Build.SourcesDirectory)\MarkdownRender\signed"
         $null = New-Item -ItemType Directory -Path $signOutPath
         # Set signing out path variable
@@ -109,7 +102,6 @@ stages:
 
     - pwsh: |
         Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Microsoft.PowerShell.MarkdownRender.dll" -Destination '$(signSrcPath)\' -Verbose -Force
-        Copy-Item -Path "$(Build.SourcesDirectory)\MarkdownRender\out\Markdig.Signed.dll" -Destination '$(signThirdPartyPath)\' -Verbose -Force
       displayName: Copy files to sign
 
     - pwsh: |
@@ -127,17 +119,6 @@ stages:
         signOutputPath: $(signOutPath)
         # the certificate ID to use
         certificateId: "CP-230012"
-        # the file pattern to use, comma separated
-        pattern: '*.dll'
-
-    - template: EsrpSign.yml@ComplianceRepo
-      parameters:
-        # the folder which contains the binaries to sign
-        buildOutputPath: $(signThirdPartyPath)
-        # the location to put the signed output
-        signOutputPath: $(signOutPath)
-        # the certificate ID to use
-        certificateId: "CP-231522"
         # the file pattern to use, comma separated
         pattern: '*.dll'
 
