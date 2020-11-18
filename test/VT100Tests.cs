@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Microsoft.PowerShell.MarkdownRender;
 using Xunit;
 
@@ -140,9 +141,9 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
     {
         private void ValidateDarkTheme(PSMarkdownOptionInfo opt)
         {
-            bool expectedEnableVT100 = System.Environment.OSVersion.Platform != PlatformID.Win32NT
-                || (System.Environment.OSVersion.Platform == PlatformID.Win32NT
-                && System.Environment.OSVersion.Version.Major >= 10);
+            bool expectedEnableVT100 = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                  || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                  && System.Environment.OSVersion.Version.Major >= 10);
 
             Assert.Equal("[1m", opt.EmphasisBold);
             Assert.Equal("[36m", opt.EmphasisItalics);
@@ -156,15 +157,15 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
             Assert.Equal("[33m", opt.Image);
             Assert.Equal("[4;38;5;117m", opt.Link);
 
-            string expectedCode = System.Environment.OSVersion.Platform == PlatformID.MacOSX ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
+            string expectedCode = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
             Assert.Equal(expectedCode, opt.Code);
         }
 
         private void ValidateLightTheme(PSMarkdownOptionInfo opt)
         {
-            bool expectedEnableVT100 = System.Environment.OSVersion.Platform != PlatformID.Win32NT
-                || (System.Environment.OSVersion.Platform == PlatformID.Win32NT
-                && System.Environment.OSVersion.Version.Major >= 10);
+            bool expectedEnableVT100 = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                  || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                  && System.Environment.OSVersion.Version.Major >= 10);
 
             Assert.Equal("[1m", opt.EmphasisBold);
             Assert.Equal("[36m", opt.EmphasisItalics);
@@ -178,7 +179,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
             Assert.Equal("[33m", opt.Image);
             Assert.Equal("[4;38;5;117m", opt.Link);
 
-            string expectedCode = System.Environment.OSVersion.Platform == PlatformID.MacOSX ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
+            string expectedCode = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
             Assert.Equal(expectedCode, opt.Code);
         }
 

@@ -3,6 +3,7 @@
 
 using System;
 using System.IO;
+using System.Runtime.InteropServices;
 
 using Markdig;
 using Markdig.Renderers;
@@ -262,7 +263,7 @@ namespace Microsoft.PowerShell.MarkdownRender
         private void SetCodeColor(bool isDarkTheme)
         {
             // MacOS terminal app does not support extended colors for VT100, so we special case for it.
-            Code = System.Environment.OSVersion.Platform == PlatformID.MacOSX ? CodeMacOS : isDarkTheme ? CodeDark : CodeLight;
+            Code = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? CodeMacOS : isDarkTheme ? CodeDark : CodeLight;
         }
     }
 
