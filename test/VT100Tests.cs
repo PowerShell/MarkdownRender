@@ -13,7 +13,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void CodeInline()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("`Hello`", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[48;2;155;155;155;38;2;30;30;30mHello{Esc}[0m\n";
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -38,7 +38,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         {
             string inputString = "```PowerShell\n$a = 1\n```";
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[48;2;155;155;155;38;2;30;30;30m$a = 1{Esc}[500@{Esc}[0m\n\n";
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -142,8 +142,8 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         private void ValidateDarkTheme(PSMarkdownOptionInfo opt)
         {
             bool expectedEnableVT100 = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                  || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                  && System.Environment.OSVersion.Version.Major >= 10);
+                || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && System.Environment.OSVersion.Version.Major >= 10);
 
             Assert.Equal("[1m", opt.EmphasisBold);
             Assert.Equal("[36m", opt.EmphasisItalics);
@@ -164,8 +164,8 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         private void ValidateLightTheme(PSMarkdownOptionInfo opt)
         {
             bool expectedEnableVT100 = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                  || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
-                  && System.Environment.OSVersion.Version.Major >= 10);
+                || (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)
+                && System.Environment.OSVersion.Version.Major >= 10);
 
             Assert.Equal("[1m", opt.EmphasisBold);
             Assert.Equal("[36m", opt.EmphasisItalics);
