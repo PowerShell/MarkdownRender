@@ -13,7 +13,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void CodeInline()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("`Hello`", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? $"{Esc}[107;95mHello{Esc}[0m\n" : $"{Esc}[48;2;155;155;155;38;2;30;30;30mHello{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -38,7 +38,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         {
             string inputString = "```PowerShell\n$a = 1\n```";
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? "[107;95m" : "[48;2;155;155;155;38;2;30;30;30m";
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? $"{Esc}[107;95m$a = 1{Esc}[500@{Esc}[0m\n\n" : $"{Esc}[48;2;155;155;155;38;2;30;30;30m$a = 1{Esc}[500@{Esc}[0m\n\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
