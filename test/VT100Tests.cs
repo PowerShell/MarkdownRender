@@ -141,7 +141,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
     {
         private void ValidateDarkTheme(PSMarkdownOptionInfo opt)
         {
-            bool expectedEnableVT100 = RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Environment.OSVersion.Version.Major >= 10;
+            bool expectedEnableVT100 = !RuntimeInformation.IsOSPlatform(OSPlatform.Windows) || Environment.OSVersion.Version.Major >= 10;
 
             Assert.Equal("[1m", opt.EmphasisBold);
             Assert.Equal("[36m", opt.EmphasisItalics);
