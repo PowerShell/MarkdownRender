@@ -227,7 +227,7 @@ stages:
   parameters:
     stageName: AzArtifactsFeed
     environmentName: AzArtFeedApproval
-    feedCredential: AzArtifactFeedPush
+    feedUrl: 'https://pkgs.dev.azure.com/mscodehub/_packaging/pscore-release/nuget/v3/index.json'
 
 - template: template/publish.yml
   parameters:
