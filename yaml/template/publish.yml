@@ -36,7 +36,7 @@ stages:
             condition: ne('${{ parameters.feedUrl }}', '')
 
           - powershell: |
-              nuget push -ApiKey AzureArtifacts -source '${{ parameters.feedUrl }}' '$(Build.ArtifactStagingDirectory)/Microsoft.PowerShell.MarkdownRender.*.nupkg'
+              nuget push -ApiKey AzureArtifacts -source '${{ parameters.feedUrl }}' '$(Build.ArtifactStagingDirectory)/Microsoft.PowerShell.MarkdownRender.$(Version).nupkg'
             displayName: Push to internal feed
             condition: ne('${{ parameters.feedUrl }}', '')
 
