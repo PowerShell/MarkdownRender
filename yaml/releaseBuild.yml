@@ -49,7 +49,7 @@ stages:
         }
 
         $vstsCommandString = "vso[task.setvariable variable=Version]$nugetVersion"
-        Write-Verbose -Message "setting Version to $releaseTag" -Verbose
+        Write-Verbose -Message "setting Version to $nugetVersion" -Verbose
         Write-Host -Object "##$vstsCommandString"
       displayName: Set NuGet package version variable
 
