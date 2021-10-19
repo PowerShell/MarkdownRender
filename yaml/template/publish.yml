@@ -50,4 +50,4 @@ stages:
               packagesToPush: '$(NugetPkgPath)'
               nuGetFeedType: external
               publishFeedCredentials: ${{ parameters.feedCredential }}
-              condition: eq('${{ parameters.feedUrl }}', '')
+            condition: eq('${{ parameters.feedUrl }}', '')
