@@ -24,7 +24,7 @@ stages:
   pool:
     name: PowerShell1ES
     demands:
-    - ImageOverride -equals MMS2019
+    - ImageOverride -equals PSMMS2019-Secure
   jobs:
   - job: Build_Job
     displayName: Build Microsoft.PowerShell.MarkdownRender
@@ -133,6 +133,14 @@ stages:
       artifact: signed
       displayName: Publish signed assembly
 
+    - ${{ if ne(variables['SkipSigning'], 'True') }}:
+      - template: Sbom.yml@ComplianceRepo
+        parameters:
+          BuildDropPath: "$(SIGNOUTPATH)"
+          Build_Repository_Uri: https://github.com/PowerShell/MarkdownRender
+          PackageName: Microsoft.PowerShell.MarkdownRender
+          PackageVersion: $(Version)
+
     - task: NuGetToolInstaller@1
       displayName: 'Install NuGet.exe'
 
@@ -195,7 +203,7 @@ stages:
     pool:
       name: PowerShell1ES
       demands:
-      - ImageOverride -equals MMS2019
+      - ImageOverride -equals PSMMS2019-Secure
     steps:
     - checkout: self
     - checkout: ComplianceRepo
