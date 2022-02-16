@@ -147,8 +147,11 @@ stages:
     - pwsh: |
         $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRender'
         $libPath = "$packageRootPath/lib/netstandard2.0"
+        $manifestPath = "$packageRootPath/_manifest"
         $null = New-Item -ItemType Directory -Path $libPath -Force
+        $null = New-Item -ItemType Directory -Path $manifestPath -Force
         Copy-Item -Path "$env:signOutPath\*.dll" -Destination $libPath -Verbose
+        Copy-Item -Path "$env:signOutPath\_manifest\*" -Destination $manifestPath -Force -Verbose -Recurse
         Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/src/packaging/microsoft.powershell.markdownrender.nuspec' -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
