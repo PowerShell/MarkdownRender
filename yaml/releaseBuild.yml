@@ -24,7 +24,7 @@ stages:
   pool:
     name: PowerShell1ES
     demands:
-    - ImageOverride -equals MMS2019
+    - ImageOverride -equals PSMMS2019-Secure
   jobs:
   - job: Build_Job
     displayName: Build Microsoft.PowerShell.MarkdownRender
@@ -133,14 +133,25 @@ stages:
       artifact: signed
       displayName: Publish signed assembly
 
+    - ${{ if ne(variables['SkipSigning'], 'True') }}:
+      - template: Sbom.yml@ComplianceRepo
+        parameters:
+          BuildDropPath: "$(SIGNOUTPATH)"
+          Build_Repository_Uri: https://github.com/PowerShell/MarkdownRender
+          PackageName: Microsoft.PowerShell.MarkdownRender
+          PackageVersion: $(Version)
+
     - task: NuGetToolInstaller@1
       displayName: 'Install NuGet.exe'
 
     - pwsh: |
         $packageRootPath = '$(System.ArtifactsDirectory)/Microsoft.PowerShell.MarkdownRender'
         $libPath = "$packageRootPath/lib/netstandard2.0"
+        $manifestPath = "$packageRootPath/_manifest"
         $null = New-Item -ItemType Directory -Path $libPath -Force
+        $null = New-Item -ItemType Directory -Path $manifestPath -Force
         Copy-Item -Path "$env:signOutPath\*.dll" -Destination $libPath -Verbose
+        Copy-Item -Path "$env:signOutPath\_manifest\*" -Destination $manifestPath -Force -Verbose -Recurse
         Copy-Item -Path '$(Build.SourcesDirectory)/MarkdownRender/src/packaging/microsoft.powershell.markdownrender.nuspec' -Destination $packageRootPath -Verbose
         Push-Location $packageRootPath
         $version = "$env:VERSION"
@@ -195,7 +206,7 @@ stages:
     pool:
       name: PowerShell1ES
       demands:
-      - ImageOverride -equals MMS2019
+      - ImageOverride -equals PSMMS2019-Secure
     steps:
     - checkout: self
     - checkout: ComplianceRepo
