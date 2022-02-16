@@ -25,7 +25,7 @@ namespace Microsoft.PowerShell.MarkdownRender
             }
         }
 
-        private void RenderWithIndent(VT100Renderer renderer, MarkdownObject block, char listBullet, int indentLevel)
+        private static void RenderWithIndent(VT100Renderer renderer, MarkdownObject block, char listBullet, int indentLevel)
         {
             // Indent left by 2 for each level on list.
             string indent = Padding(indentLevel * 2);
