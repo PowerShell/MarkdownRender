@@ -20,7 +20,7 @@
 
   <ItemGroup>
   <!-- Source: https://github.com/lunet-io/markdig/ -->
-    <PackageReference Include="Markdig.Signed" Version="0.22.0">
+    <PackageReference Include="Markdig.Signed" Version="0.31.0">
       <PrivateAssets>All</PrivateAssets>
     </PackageReference>
   </ItemGroup>
