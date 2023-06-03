@@ -27,16 +27,16 @@ jobs:
   - job: '${{ parameters.jobName }}_netcoreapp31'
     pool:
         vmImage: ${{ parameters.vmImageName }}
-    displayName: ${{ parameters.jobDisplayName }} - netcoreapp3.1
+    displayName: ${{ parameters.jobDisplayName }} - net6.0
     steps:
     - download: current
     - task: DotNetCoreCLI@2
-      displayName: Tests on ${{parameters.vmImageName}} - netcoreapp3.1
+      displayName: Tests on ${{parameters.vmImageName}} - net6.0
       inputs:
         command: test
         projects: test/test.csproj
         nobuild: true
-        arguments: --runtime netcoreapp3.1 --collect:"XPlat Code Coverage"
+        arguments: --runtime net6.0 --collect:"XPlat Code Coverage"
         testRunTitle: Tests on ${{parameters.vmImageName}}
     - task: PublishCodeCoverageResults@1
       inputs:
