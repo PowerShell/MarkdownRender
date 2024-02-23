@@ -44,6 +44,14 @@ namespace Microsoft.PowerShell.MarkdownRender
         /// Gets the AST of the Markdown string.
         /// </summary>
         public Markdig.Syntax.MarkdownDocument Tokens { get; internal set; }
+
+
+        /// <summary>
+        /// Gets the converted markdown as a string.
+        /// </summary>
+        public string ToString() {
+            return this.Html;
+        }
     }
 
     /// <summary>
