@@ -50,7 +50,14 @@ namespace Microsoft.PowerShell.MarkdownRender
         /// Gets the converted markdown as a string.
         /// </summary>
         public string ToString() {
-            return this.Html;
+            if (! string.IsNullOrEmpty(this.Html)) {
+                return this.Html;
+            } else if (! string.IsNullOrEmpty(this.VT100EncodedString)) {
+                return this.VT100EncodedString;
+            } else {
+                return string.Empty;
+            }
+            
         }
     }
 
