@@ -49,7 +49,7 @@ namespace Microsoft.PowerShell.MarkdownRender
         /// <summary>
         /// Gets the converted markdown as a string.
         /// </summary>
-        public string ToString() {
+        public override string ToString() {
             if (! string.IsNullOrEmpty(this.Html)) {
                 return this.Html;
             } else if (! string.IsNullOrEmpty(this.VT100EncodedString)) {
