@@ -162,6 +162,7 @@ code `code inline` should work
 
 ```ps1
 $a = 1
+$b = 2
 ```
 
 > > double quote
@@ -208,6 +209,7 @@ solo inline
 code code inline should work
 
 $a = 1
+$b = 2
 
 > > double quote
 
