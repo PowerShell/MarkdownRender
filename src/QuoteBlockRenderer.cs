@@ -13,14 +13,7 @@ namespace Microsoft.PowerShell.MarkdownRender
         protected override void Write(VT100Renderer renderer, QuoteBlock obj)
         {
             renderer.PushIndent(obj.QuoteChar + " ");
-            for (int i = 0; i < obj.Count; i++)
-            {
-                Block b = obj[i];
-                renderer.Write(b);
-
-                if (i == obj.Count - 1) break;
-                renderer.WriteLine();
-            }
+            renderer.WriteChildrenJoinNewLine(obj);
             renderer.PopIndent();
         }
     }
