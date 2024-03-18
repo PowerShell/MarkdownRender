@@ -24,17 +24,14 @@ namespace Microsoft.PowerShell.MarkdownRender
                         // This specifically helps for parameters help content.
                         if (string.Equals(obj.Info, "yaml", StringComparison.OrdinalIgnoreCase))
                         {
-                            renderer.Write("\t").WriteLine(codeLine.ToString());
+                            renderer.Write("\t").Write(codeLine.ToString());
                         }
                         else
                         {
-                            renderer.WriteLine(renderer.EscapeSequences.FormatCode(codeLine.ToString(), isInline: false));
+                            renderer.Write(renderer.EscapeSequences.FormatCode(codeLine.ToString(), isInline: false));
                         }
                     }
                 }
-
-                // Add a blank line after the code block for better readability.
-                renderer.WriteLine();
             }
         }
     }

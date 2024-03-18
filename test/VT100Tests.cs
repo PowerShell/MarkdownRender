@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using Microsoft.PowerShell.MarkdownRender;
 using Xunit;
+using System.Text.RegularExpressions;
 
 namespace Microsoft.PowerShell.MarkdownRender.Tests
 {
@@ -38,7 +39,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         {
             string inputString = "```PowerShell\n$a = 1\n```";
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? $"{Esc}[107;95m$a = 1{Esc}[500@{Esc}[0m\n\n" : $"{Esc}[48;2;155;155;155;38;2;30;30;30m$a = 1{Esc}[500@{Esc}[0m\n\n";
+            string expected = RuntimeInformation.IsOSPlatform(OSPlatform.OSX) ? $"{Esc}[107;95m$a = 1{Esc}[500@{Esc}[0m\n\n" : $"{Esc}[48;2;155;155;155;38;2;30;30;30m$a = 1{Esc}[500@{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -46,7 +47,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header1()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("# Heading1", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[7mHeading1{Esc}[0m\n\n";
+            string expected = $"{Esc}[7mHeading1{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -54,7 +55,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header2()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("## Heading2", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[4;93mHeading2{Esc}[0m\n\n";
+            string expected = $"{Esc}[4;93mHeading2{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -62,7 +63,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header3()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("### Heading3", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[4;94mHeading3{Esc}[0m\n\n";
+            string expected = $"{Esc}[4;94mHeading3{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -70,7 +71,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header4()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("#### Heading4", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[4;95mHeading4{Esc}[0m\n\n";
+            string expected = $"{Esc}[4;95mHeading4{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -78,7 +79,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header5()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("##### Heading5", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[4;96mHeading5{Esc}[0m\n\n";
+            string expected = $"{Esc}[4;96mHeading5{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -86,7 +87,15 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void Header6()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("###### Heading6", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[4;97mHeading6{Esc}[0m\n\n";
+            string expected = $"{Esc}[4;97mHeading6{Esc}[0m\n";
+            Assert.Equal(expected, m.VT100EncodedString);
+        }
+
+        [Fact]
+        public void Inline()
+        {
+            var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("Hello\n\nWorld", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
+            string expected = "Hello\n\nWorld\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -109,20 +118,20 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         [Fact]
         public void OrderedList()
         {
-            string inputString = "1. A\n2. B\n3. C\n";
+            string inputString = "1. `A`\n2. B\n3. C\n";
 
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"1. A\n2. B\n3. C\n\n";
+            string expected = $"1. {Esc}[48;2;155;155;155;38;2;30;30;30mA{Esc}[0m\n2. B\n3. C\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
         [Fact]
         public void UnorderedList()
         {
-            string inputString = "* A\n* B\n* C\n";
+            string inputString = "* `A`\n* B\n* C\n";
 
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"* A\n* B\n* C\n\n";
+            string expected = $"* {Esc}[48;2;155;155;155;38;2;30;30;30mA{Esc}[0m\n* B\n* C\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 
@@ -132,8 +141,111 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
             string inputString = "> Hello";
 
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(inputString, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"> Hello\n\n\n";
+            string expected = $"> Hello\n";
             Assert.Equal(expected, m.VT100EncodedString);
+        }
+
+        [Fact]
+        public void MarkdownDocument()
+        {
+            string md = @"
+
+# Heading1
+
+- li
+- `hello`
+- [link](linker)
+
+`solo inline`
+
+code `code inline` should work
+
+```ps1
+$a = 1
+```
+
+> > double quote
+
+> quote
+> > double quote
+> > > triple quote
+> >
+> > back a quote
+> >
+> still quote
+
+1. `a`
+2. [b](l)
+3. c
+
+
+- l1.0
+    1. l2.0
+        - l3.0
+    3. l2.1
+        - l3.1
+    3. l2.2
+- l1.1
+
+
+| a | bc |
+|---|---|
+| 1 | 2 |
+| 3 | 4 |
+
+---
+
+end
+".Replace("\r\n", "\n");
+            string expected = @"Heading1
+
+- li
+- hello
+- ""link""
+
+solo inline
+
+code code inline should work
+
+$a = 1
+
+> > double quote
+
+> quote
+> > double quote
+> > > triple quote
+> > back a quote
+> still quote
+
+1. a
+2. ""b""
+3. c
+
+- l1.0
+  1. l2.0
+    - l3.0
+  2. l2.1
+    - l3.1
+  3. l2.2
+- l1.1
+
+| a | bc |
+|---|----|
+| 1 | 2 |
+| 3 | 4 |
+
+
+
+end
+".Replace("\r\n", "\n");
+
+            var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert(md, MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
+            string pattern = @"\x1B\[[0-?]*[@-~]";
+
+            // Replace all occurrences of VT100 escape sequences with an empty string
+            string actual = Regex.Replace(m.VT100EncodedString, pattern, "");
+            
+            Assert.Equal(expected, actual);   
         }
     }
 
