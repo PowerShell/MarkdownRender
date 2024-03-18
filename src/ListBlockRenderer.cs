@@ -14,6 +14,7 @@ namespace Microsoft.PowerShell.MarkdownRender
         {
             for (int idx = 0; idx < obj.Count; idx++)
             {
+                if (idx > 0) renderer.WriteLine();
 
                 Block block = obj[idx];
 
@@ -28,9 +29,6 @@ namespace Microsoft.PowerShell.MarkdownRender
 
                 renderer.Write(block);
 
-                if (idx == obj.Count - 1) break;
-
-                renderer.WriteLine();
             }
         }
     }
