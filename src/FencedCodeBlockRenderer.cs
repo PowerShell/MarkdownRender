@@ -16,25 +16,26 @@ namespace Microsoft.PowerShell.MarkdownRender
         {
             if (obj?.Lines.Lines != null)
             {
+                bool f = true;
                 foreach (StringLine codeLine in obj.Lines.Lines)
                 {
                     if (!string.IsNullOrWhiteSpace(codeLine.ToString()))
                     {
+                        if (f) f = false;
+                        else renderer.WriteLine();
+                        
                         // If the code block is of type YAML, then tab to right to improve readability.
                         // This specifically helps for parameters help content.
                         if (string.Equals(obj.Info, "yaml", StringComparison.OrdinalIgnoreCase))
                         {
-                            renderer.Write("\t").WriteLine(codeLine.ToString());
+                            renderer.Write("\t").Write(codeLine.ToString());
                         }
                         else
                         {
-                            renderer.WriteLine(renderer.EscapeSequences.FormatCode(codeLine.ToString(), isInline: false));
+                            renderer.Write(renderer.EscapeSequences.FormatCode(codeLine.ToString(), isInline: false));
                         }
                     }
                 }
-
-                // Add a blank line after the code block for better readability.
-                renderer.WriteLine();
             }
         }
     }

@@ -10,13 +10,13 @@ namespace Microsoft.PowerShell.MarkdownRender
     /// </summary>
     internal class ParagraphBlockRenderer : VT100ObjectRenderer<ParagraphBlock>
     {
+        /**
+         * Does not append newline after rendering the paragraph.
+         */
         protected override void Write(VT100Renderer renderer, ParagraphBlock obj)
         {
             // Call the renderer for children, leaf inline or line breaks.
             renderer.WriteChildren(obj.Inline);
-
-            // Add new line at the end of the paragraph.
-            renderer.WriteLine();
         }
     }
 }

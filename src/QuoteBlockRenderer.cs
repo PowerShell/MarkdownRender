@@ -12,14 +12,9 @@ namespace Microsoft.PowerShell.MarkdownRender
     {
         protected override void Write(VT100Renderer renderer, QuoteBlock obj)
         {
-            // Iterate through each item and add the quote character before the content.
-            foreach (var item in obj)
-            {
-                renderer.Write(obj.QuoteChar).Write(" ").Write(item);
-            }
-
-            // Add blank line after the quote block.
-            renderer.WriteLine();
+            renderer.PushIndent(obj.QuoteChar + " ");
+            renderer.WriteChildrenJoinNewLine(obj);
+            renderer.PopIndent();
         }
     }
 }

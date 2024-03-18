@@ -12,17 +12,7 @@ namespace Microsoft.PowerShell.MarkdownRender
     {
         protected override void Write(VT100Renderer renderer, LeafInline obj)
         {
-            // If the next sibling is null, then this is the last line in the paragraph.
-            // Add new line character at the end.
-            // Else just write without newline at the end.
-            if (obj.NextSibling == null)
-            {
-                renderer.WriteLine(obj.ToString());
-            }
-            else
-            {
-                renderer.Write(obj.ToString());
-            }
+            renderer.Write(obj.ToString());
         }
     }
 }

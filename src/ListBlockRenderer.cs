@@ -12,36 +12,23 @@ namespace Microsoft.PowerShell.MarkdownRender
     {
         protected override void Write(VT100Renderer renderer, ListBlock obj)
         {
-            // start index of a numbered block.
-            int index = 1;
-
-            foreach (var item in obj)
+            for (int idx = 0; idx < obj.Count; idx++)
             {
-                if (item is ListItemBlock listItem)
-                {
-                    if (obj.IsOrdered)
-                    {
-                        RenderNumberedList(renderer, listItem, index++);
-                    }
-                    else
-                    {
-                        renderer.Write(listItem);
-                    }
-                }
-            }
+                if (idx > 0) renderer.WriteLine();
 
-            renderer.WriteLine();
-        }
+                Block block = obj[idx];
 
-        private static void RenderNumberedList(VT100Renderer renderer, ListItemBlock block, int index)
-        {
-            // For a numbered list, we need to make sure the index is incremented.
-            foreach (var line in block)
-            {
-                if (line is ParagraphBlock paragraphBlock)
+                if (obj.IsOrdered)
                 {
-                    renderer.Write(index.ToString()).Write(". ").Write(paragraphBlock.Inline);
+                    renderer.Write((idx + 1).ToString()).Write(". ");
                 }
+                else
+                {
+                    renderer.Write(obj.BulletType).Write(" ");
+                }
+
+                renderer.Write(block);
+
             }
         }
     }

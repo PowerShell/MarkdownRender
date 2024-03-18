@@ -73,7 +73,7 @@ namespace Microsoft.PowerShell.MarkdownRender
 
             if (conversionType.HasFlag(MarkdownConversionType.VT100))
             {
-                pipeline = new MarkdownPipelineBuilder().Build();
+                pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
 
                 // Use the VT100 renderer.
                 var renderer = new VT100Renderer(writer, optionInfo);

@@ -20,33 +20,27 @@ namespace Microsoft.PowerShell.MarkdownRender
                 switch (obj.Level)
                 {
                     case 1:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader1(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader1(headerText));
                         break;
 
                     case 2:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader2(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader2(headerText));
                         break;
 
                     case 3:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader3(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader3(headerText));
                         break;
 
                     case 4:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader4(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader4(headerText));
                         break;
 
                     case 5:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader5(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader5(headerText));
                         break;
 
                     case 6:
-                        renderer.WriteLine(renderer.EscapeSequences.FormatHeader6(headerText));
-                        renderer.WriteLine();
+                        renderer.Write(renderer.EscapeSequences.FormatHeader6(headerText));
                         break;
                 }
             }

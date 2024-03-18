@@ -12,7 +12,7 @@ namespace Microsoft.PowerShell.MarkdownRender.Tests
         public void VT100Renderer()
         {
             var m = Microsoft.PowerShell.MarkdownRender.MarkdownConverter.Convert("# Heading1", MarkdownConversionType.VT100, new PSMarkdownOptionInfo() );
-            string expected = $"{Esc}[7mHeading1{Esc}[0m\n\n";
+            string expected = $"{Esc}[7mHeading1{Esc}[0m\n";
             Assert.Equal(expected, m.VT100EncodedString);
         }
 

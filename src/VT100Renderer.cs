@@ -3,6 +3,7 @@
 
 using System.IO;
 using Markdig.Renderers;
+using Markdig.Syntax;
 
 namespace Microsoft.PowerShell.MarkdownRender
 {
@@ -20,6 +21,9 @@ namespace Microsoft.PowerShell.MarkdownRender
         {
             EscapeSequences = new VT100EscapeSequences(optionInfo);
 
+            // Root Renderer to handle element spacing
+            ObjectRenderers.Add(new MarkdownDocumentRenderer());
+
             // Add the various element renderers.
             ObjectRenderers.Add(new HeaderBlockRenderer());
             ObjectRenderers.Add(new LineBreakRenderer());
@@ -32,11 +36,33 @@ namespace Microsoft.PowerShell.MarkdownRender
             ObjectRenderers.Add(new ListBlockRenderer());
             ObjectRenderers.Add(new ListItemBlockRenderer());
             ObjectRenderers.Add(new QuoteBlockRenderer());
+
+            // Table
+            ObjectRenderers.Add(new TableRenderer());
         }
 
         /// <summary>
         /// Gets the current escape sequences.
         /// </summary>
         public VT100EscapeSequences EscapeSequences { get; }
+
+        /// <summary>
+        /// Modify the container block to remove empty children and write the children
+        /// 
+        /// Then write children excluding last line break
+        /// </summary>
+        public void WriteChildrenJoinNewLine(ContainerBlock obj)
+        {
+            bool f = true;
+            foreach (Block b in obj)
+            {
+                if (b.Span.IsEmpty) continue;
+
+                if (f) f = false;
+                else WriteLine();
+
+                Write(b);
+            }
+        }
     }
 }
